@@ -32,7 +32,7 @@ export default class RNet extends EventEmitter {
   _sources: Source[] = [];
   _autoUpdating: boolean = false;
   _connected: boolean = false;
-  _waitingForHandshakeTimeout: NodeJS.Timer | undefined;
+  _packetTimeout: NodeJS.Timer | undefined;
   _packetQueue: RNetPacket[] = [];
   _allMuted: boolean = false;
   _autoUpdateInterval: NodeJS.Timer | undefined;
@@ -63,6 +63,7 @@ export default class RNet extends EventEmitter {
       this.emit('disconnected');
     });
     this._serialPort.addEventListener('message', e => {
+      console.debug('got message');
       this._handleData(e.data);
     });
   }
@@ -73,35 +74,6 @@ export default class RNet extends EventEmitter {
   }
 
   readConfiguration() {
-    let sourceFile;
-    try {
-      sourceFile = localStorage.getItem('sources');
-    } catch (e) {}
-
-    if (sourceFile && sourceFile.length > 0) {
-      const sources = JSON.parse(sourceFile);
-      for (let sourceID = 0; sourceID < sources.length; sourceID++) {
-        if (sources[sourceID] != null) {
-          const sourceData = sources[sourceID];
-          const source = this.createSource(
-            sourceID,
-            sourceData.name,
-            ('cast' in sourceData && Source.TYPE_GOOGLE_CAST) || sourceData.type,
-            false
-          );
-          if ('auto_on_zones' in sourceData) {
-            source._autoOnZones = sourceData.auto_on_zones;
-          }
-          if ('auto_off' in sourceData) {
-            source._autoOff = sourceData.auto_off;
-          }
-          if ('override_name' in sourceData) {
-            source._overrideName = sourceData.override_name;
-          }
-        }
-      }
-    }
-
     let zonesFile = localStorage.getItem('zones') || '';
     if (zonesFile.length > 0) {
       const zones = JSON.parse(zonesFile);
@@ -122,28 +94,7 @@ export default class RNet extends EventEmitter {
   }
 
   writeConfiguration() {
-    this.writeSources();
     this.writeZones();
-  }
-
-  writeSources() {
-    const sources = [];
-    for (let sourceID = 0; sourceID < this._sources.length; sourceID++) {
-      if (this._sources[sourceID] == null) {
-        sources[sourceID] = null;
-      } else {
-        const source = this._sources[sourceID];
-        sources[sourceID] = {
-          name: source.getName(),
-          type: source.getType(),
-          auto_off: source._autoOff,
-          auto_on_zones: source._autoOnZones,
-          override_name: source._overrideName,
-        };
-      }
-    }
-
-    localStorage.setItem('sources', JSON.stringify(sources));
   }
 
   writeZones() {
@@ -264,6 +215,8 @@ export default class RNet extends EventEmitter {
         this.emit('parameter', zone, parameterID, value);
       });
 
+    zone.requestInfo();
+
     this.emit('new-zone', zone);
     return zone;
   }
@@ -316,7 +269,7 @@ export default class RNet extends EventEmitter {
     return 0;
   }
 
-  createSource(sourceID: number, name: string, type: number, writeConfig = true) {
+  createSource(sourceID: number, name: string, type?: number) {
     let source = this._sources[sourceID];
     if (source) {
       return source;
@@ -324,18 +277,12 @@ export default class RNet extends EventEmitter {
     source = new Source(this, sourceID, name, type || Source.TYPE_GENERIC);
     this._sources[sourceID] = source;
 
-    if (writeConfig) {
-      this.writeSources();
-    }
-
     source
       .on('name', (name, oldName) => {
         this.emit('source-name', source, name, oldName);
-        this.writeSources();
       })
       .on('type', type => {
         this.emit('source-type', source, type);
-        this.writeSources();
       })
       .on('media-metadata', (title, artist, artworkURL) => {
         this.emit('media-metadata', source, title, artist, artworkURL);
@@ -408,7 +355,6 @@ export default class RNet extends EventEmitter {
     }
     this._sources.splice(lastNonNull + 1, this._sources.length - lastNonNull + 1);
 
-    this.writeSources();
     this.emit('source-deleted', sourceID);
   }
 
@@ -416,21 +362,7 @@ export default class RNet extends EventEmitter {
     if (this._sources[sourceID]) {
       return this._sources[sourceID];
     }
-    return null;
-  }
-
-  findSourceByName(name: string) {
-    name = name.toUpperCase();
-    for (let sourceID = 0; sourceID < this._sources.length; sourceID++) {
-      if (
-        this._sources[sourceID] != null &&
-        this._sources[sourceID].getName().toUpperCase() == name
-      ) {
-        return this._sources[sourceID];
-      }
-    }
-
-    return false;
+    return (this._sources[sourceID] = this.createSource(sourceID, String(sourceID)));
   }
 
   getSourcesSize() {
@@ -521,39 +453,24 @@ export default class RNet extends EventEmitter {
       return;
     }
     if (packet instanceof HandshakePacket) {
-      this._serialPort.send(packet.getBuffer());
-      console.debug('DEBUG: Sent handshake packet to RNet.');
-
-      if (!this._waitingForHandshakeTimeout) {
-        console.warn('Unexpectedly sent a handshake packet!');
-      } else {
-        clearTimeout(this._waitingForHandshakeTimeout);
-        this._waitingForHandshakeTimeout = undefined;
-      }
-
-      if (this._packetQueue.length > 0) {
-        this.sendData(this._packetQueue.shift()!, true);
-      }
-    } else if (this._waitingForHandshakeTimeout || (!queueLoop && this._packetQueue.length > 0)) {
-      console.debug('DEBUG: Queued packet while expecting to perform a handshake.');
-      this._packetQueue.push(packet);
+      this._packetQueue.unshift(packet);
+      this._processQueue();
     } else {
-      this._serialPort.send(packet.getBuffer());
-      console.debug(`DEBUG: Sent packet ${packet.constructor.name} to RNet.`);
+      this._packetQueue.push(packet);
+      this._processQueue();
+    }
+  }
 
-      if (packet.causesResponseWithHandshake()) {
-        console.debug('DEBUG: Now expecting to perform handshake.');
-        this._waitingForHandshakeTimeout = setTimeout(() => {
-          console.warn('Waited for expected handshake for too long. Continuing...');
-          this._waitingForHandshakeTimeout = undefined;
-          if (this._packetQueue.length > 0) {
-            this.sendData(this._packetQueue.shift()!, true);
-          }
-        }, 3000);
-      }
-
-      if (!this._waitingForHandshakeTimeout && this._packetQueue.length > 0) {
-        this.sendData(this._packetQueue.shift()!, true);
+  _processQueue() {
+    if (this._packetTimeout == null) {
+      const nextPacket = this._packetQueue.shift();
+      if (nextPacket != null) {
+        console.debug(`DEBUG: Sending packet ${nextPacket.constructor.name} to RNet.`);
+        this._serialPort.send(nextPacket.getBuffer());
+        this._packetTimeout = setTimeout(() => {
+          this._packetTimeout = undefined;
+          this._processQueue();
+        }, 200);
       }
     }
   }
@@ -578,12 +495,12 @@ export default class RNet extends EventEmitter {
           this._pendingPacket.writeUInt8(b);
           const buffer = this._pendingPacket.toBuffer();
           this._pendingPacket = undefined;
-          setTimeout(() => {
-            const packet = build(buffer);
-            if (packet) {
-              this._receivedRNetPacket(packet);
-            }
-          }, 0);
+          const packet = build(buffer);
+          if (packet) {
+            this._receivedRNetPacket(packet);
+          } else {
+            console.warn('Received unknown packet from RNet', buffer);
+          }
         } else {
           console.warn('Received packet from RNet without start of new message.');
         }
@@ -614,7 +531,7 @@ export default class RNet extends EventEmitter {
     console.debug(`DEBUG: Received packet ${packet.constructor.name} from RNet.`);
 
     if (packet.requiresHandshake()) {
-      this.sendData(new HandshakePacket(packet.sourceControllerID, 2));
+      // this.sendData(new HandshakePacket(packet.sourceControllerID, 2));
     }
 
     if (packet instanceof ZoneInfoPacket) {
@@ -629,6 +546,7 @@ export default class RNet extends EventEmitter {
         zone.setParameter(BALANCE, packet.getBalance(), true);
         zone.setParameter(PARTY_MODE, packet.getPartyMode(), true);
         zone.setParameter(DO_NOT_DISTURB, packet.getDoNotDisturbMode(), true);
+        this.emit('update', packet.getZoneID());
       } else {
         console.warn(
           'Received ZoneInfoPacket for unknown zone %d-%d',
@@ -640,6 +558,7 @@ export default class RNet extends EventEmitter {
       const zone = this.getZone(packet.getControllerID(), packet.getZoneID());
       if (zone) {
         zone.setPower(packet.getPower(), true);
+        this.emit('update');
       } else {
         console.warn(
           'Received ZonePowerPacket for unknown zone %d-%d',
@@ -651,6 +570,7 @@ export default class RNet extends EventEmitter {
       const zone = this.getZone(packet.getControllerID(), packet.getZoneID());
       if (zone) {
         zone.setSourceID(packet.getSourceID(), true);
+        this.emit('update');
       } else {
         console.warn(
           'Received ZoneSourcePacket for unknown zone %d-%d',
@@ -662,6 +582,7 @@ export default class RNet extends EventEmitter {
       const zone = this.getZone(packet.getControllerID(), packet.getZoneID());
       if (zone) {
         zone.setVolume(packet.getVolume(), true);
+        this.emit('update');
       } else {
         console.warn(
           'Received ZoneVolumePacket for unknown zone %d-%d',
@@ -673,6 +594,7 @@ export default class RNet extends EventEmitter {
       const zone = this.getZone(packet.getControllerID(), packet.getZoneID());
       if (zone) {
         zone.setParameter(packet.getParameterID(), packet.getValue(), true);
+        this.emit('update');
       } else {
         console.warn(
           'Received ZoneParameterPacket for unknown zone %d-%d',
@@ -696,12 +618,14 @@ export default class RNet extends EventEmitter {
             packet.getHighValue(),
             true
           );
+          this.emit('update');
           break;
         case TYPE_VOLUME:
           this.getZone(packet.targetControllerID, packet.targetZoneID)?.setVolume(
             packet.getLowValue() * 2,
             true
           );
+          this.emit('update');
           break;
       }
     } else if (packet instanceof KeypadEventPacket) {
@@ -739,6 +663,7 @@ export default class RNet extends EventEmitter {
               break;
           }
         }
+        this.emit('update');
       } else {
         console.warn(
           'Received keypad event from unknown Zone (%d-%d)',

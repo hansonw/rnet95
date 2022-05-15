@@ -23,7 +23,7 @@ const GlobalStyles = createGlobalStyle`
     font-weight: bold;
     font-style: normal
   }
-  body {
+  #root {
     font-family: 'ms_sans_serif';
   }
   ${styleReset}
@@ -32,9 +32,11 @@ const GlobalStyles = createGlobalStyle`
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
   <React.StrictMode>
-    <GlobalStyles />
-    <ThemeProvider theme={original}>
-      <App />
-    </ThemeProvider>
+    <div>
+      <GlobalStyles />
+      <ThemeProvider theme={original}>
+        <App />
+      </ThemeProvider>
+    </div>
   </React.StrictMode>
 );

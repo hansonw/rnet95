@@ -197,34 +197,35 @@ class Zone extends EventEmitter {
 
   requestInfo() {
     this._rNet.sendData(
-      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_INFO),
+      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_INFO)
     );
-    this._rNet.sendData(
-      new RequestParameterPacket(this._ctrllrID, this._zoneID, ExtraZoneParam.TURN_ON_VOLUME),
-    );
+    // TODO: not needed for now
+    // this._rNet.sendData(
+    //   new RequestParameterPacket(this._ctrllrID, this._zoneID, ExtraZoneParam.TURN_ON_VOLUME)
+    // );
   }
 
   requestBasicInfo() {
     this._rNet.sendData(
-      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_POWER),
+      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_POWER)
     );
     this._rNet.sendData(
-      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_VOLUME),
+      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_VOLUME)
     );
     this._rNet.sendData(
-      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_SOURCE),
+      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_SOURCE)
     );
   }
 
   requestPowered() {
     this._rNet.sendData(
-      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_POWER),
+      new RequestDataPacket(this._ctrllrID, this._zoneID, RequestDataPacket.DATA_TYPE.ZONE_POWER)
     );
   }
 
   displayMessage(message, flashTime = 0, alignment = DisplayMessagePacket.ALIGN_LEFT) {
     this._rNet.sendData(
-      new DisplayMessagePacket(this._ctrllrID, this._zoneID, alignment, flashTime, message),
+      new DisplayMessagePacket(this._ctrllrID, this._zoneID, alignment, flashTime, message)
     );
   }
 }
