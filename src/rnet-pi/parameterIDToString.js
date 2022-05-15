@@ -1,4 +1,4 @@
-module.exports = function (parameterID) {
+export default function (parameterID) {
   switch (parameterID) {
     case 0:
       return 'Bass';
@@ -21,4 +21,4 @@ module.exports = function (parameterID) {
     default:
       return 'Unknown';
   }
-};
+}

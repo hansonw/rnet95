@@ -1,4 +1,4 @@
-const EventPacket = require('./EventPacket');
+import EventPacket from './EventPacket';
 
 class SetSourcePacket extends EventPacket {
   constructor(controllerID, zoneID, sourceID) {
@@ -35,4 +35,4 @@ SetSourcePacket.fromPacket = function (eventpacket) {
   throw new TypeError('Cannot create SetSourcePacket from anything other than an EventPacket');
 };
 
-module.exports = SetSourcePacket;
+export default SetSourcePacket;

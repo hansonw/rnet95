@@ -1,5 +1,5 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const RNetPacket = require('./RNetPacket');
+import RNetPacket from './RNetPacket';
 
 class DataPacket extends RNetPacket {
   constructor() {
@@ -94,4 +94,4 @@ class DataPacket extends RNetPacket {
   }
 }
 
-module.exports = DataPacket;
+export default DataPacket;

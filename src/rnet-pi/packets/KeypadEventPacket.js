@@ -1,4 +1,4 @@
-const EventPacket = require('./EventPacket');
+import EventPacket from './EventPacket';
 
 class KeypadEventPacket extends EventPacket {
   constructor(controllerID, zoneID, key) {
@@ -50,4 +50,4 @@ KeypadEventPacket.KEYS = {
   PLAY: 0x73,
 };
 
-module.exports = KeypadEventPacket;
+export default KeypadEventPacket;

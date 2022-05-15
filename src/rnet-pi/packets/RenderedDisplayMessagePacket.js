@@ -1,5 +1,5 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const RNetPacket = require('./RNetPacket');
+import RNetPacket from './RNetPacket';
 
 class RenderedDisplayMessagePacket extends RNetPacket {
   constructor() {
@@ -100,4 +100,4 @@ RenderedDisplayMessagePacket.TYPE_KEYPAD_ID = 49;
 RenderedDisplayMessagePacket.TYPE_RECEIVER_KEY_NAME = 50;
 RenderedDisplayMessagePacket.TYPE_RECEIVER_DEVICE_TYPE_NAME = 51;
 
-module.exports = RenderedDisplayMessagePacket;
+export default RenderedDisplayMessagePacket;

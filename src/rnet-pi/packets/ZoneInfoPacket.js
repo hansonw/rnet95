@@ -1,4 +1,4 @@
-const DataPacket = require('./DataPacket');
+import DataPacket from './DataPacket';
 
 class ZoneInfoPacket extends DataPacket {
   requiresHandshake() {
@@ -59,4 +59,4 @@ ZoneInfoPacket.fromPacket = function (dataPacket) {
   throw new TypeError('Cannot create ZoneInfoPacket with anything other than a DataPacket');
 };
 
-module.exports = ZoneInfoPacket;
+export default ZoneInfoPacket;

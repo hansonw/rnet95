@@ -1,5 +1,5 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const RequestDataPacket = require('./RequestDataPacket');
+import RequestDataPacket from './RequestDataPacket';
 
 class RequestParameterPacket extends RequestDataPacket {
   constructor(controllerID, zoneID, parameterID) {
@@ -9,4 +9,4 @@ class RequestParameterPacket extends RequestDataPacket {
   }
 }
 
-module.exports = RequestParameterPacket;
+export default RequestParameterPacket;

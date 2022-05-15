@@ -1,14 +1,12 @@
 import EventEmitter from 'events';
 import {SmartBuffer} from '../smart-buffer';
 
-import {BASS, TREBLE, LOUDNESS, BALANCE, PARTY_MODE, DO_NOT_DISTURB} from './extraZoneParam';
+import ExtraZoneParam from './extraZoneParam';
+const {BASS, TREBLE, LOUDNESS, BALANCE, PARTY_MODE, DO_NOT_DISTURB} = ExtraZoneParam;
 import HandshakePacket from './packets/HandshakePacket';
-import KeypadEventPacket, {KEYS} from './packets/KeypadEventPacket';
+import KeypadEventPacket from './packets/KeypadEventPacket';
 import {build} from './packets/PacketBuilder';
-import RenderedDisplayMessagePacket, {
-  TYPE_SOURCE_NAME,
-  TYPE_VOLUME,
-} from './packets/RenderedDisplayMessagePacket';
+import RenderedDisplayMessagePacket from './packets/RenderedDisplayMessagePacket';
 import RNetPacket from './packets/RNetPacket';
 import SetAllPowerPacket from './packets/SetAllPowerPacket';
 import SetParameterPacket from './packets/SetParameterPacket';
@@ -47,7 +45,7 @@ export default class RNet extends EventEmitter {
     this.readConfiguration();
     this.writeConfiguration();
 
-    this._serialPort = new WebSocket(`ws://${this._device}`);
+    this._serialPort = new WebSocket(this._device);
     this._serialPort.binaryType = 'arraybuffer';
     this._serialPort.addEventListener('open', () => {
       this._connected = true;
@@ -306,25 +304,25 @@ export default class RNet extends EventEmitter {
             let key = null;
             switch (operation) {
               case Source.CONTROL_NEXT:
-                key = KEYS.NEXT;
+                key = KeypadEventPacket.KEYS.NEXT;
                 break;
               case Source.CONTROL_PREV:
-                key = KEYS.PREVIOUS;
+                key = KeypadEventPacket.KEYS.PREVIOUS;
                 break;
               case Source.CONTROL_STOP:
-                key = KEYS.STOP;
+                key = KeypadEventPacket.KEYS.STOP;
                 break;
               case Source.CONTROL_PLAY:
-                key = KEYS.PLAY;
+                key = KeypadEventPacket.KEYS.PLAY;
                 break;
               case Source.CONTROL_PAUSE:
-                key = KEYS.PAUSE;
+                key = KeypadEventPacket.KEYS.PAUSE;
                 break;
               case Source.CONTROL_PLUS:
-                key = KEYS.PLUS;
+                key = KeypadEventPacket.KEYS.PLUS;
                 break;
               case Source.CONTROL_MINUS:
-                key = KEYS.MINUS;
+                key = KeypadEventPacket.KEYS.MINUS;
                 break;
             }
 
@@ -613,14 +611,14 @@ export default class RNet extends EventEmitter {
             console.log("Short Value: %d", packet.getShortValue()); */
 
       switch (packet.getRenderType()) {
-        case TYPE_SOURCE_NAME:
+        case RenderedDisplayMessagePacket.TYPE_SOURCE_NAME:
           this.getZone(packet.targetControllerID, packet.targetZoneID)?.setSourceID(
             packet.getHighValue(),
             true
           );
           this.emit('update');
           break;
-        case TYPE_VOLUME:
+        case RenderedDisplayMessagePacket.TYPE_VOLUME:
           this.getZone(packet.targetControllerID, packet.targetZoneID)?.setVolume(
             packet.getLowValue() * 2,
             true
@@ -633,32 +631,32 @@ export default class RNet extends EventEmitter {
       if (zone != null) {
         const source = this.getSource(zone.getSourceID());
         switch (packet.getKey()) {
-          case KEYS.POWER:
+          case KeypadEventPacket.KEYS.POWER:
             zone.setPower(!zone.getPower(), true);
             return;
         }
 
         if (source != null) {
           switch (packet.getKey()) {
-            case KEYS.NEXT:
+            case KeypadEventPacket.KEYS.NEXT:
               source.control(Source.CONTROL_NEXT, true);
               break;
-            case KEYS.PREVIOUS:
+            case KeypadEventPacket.KEYS.PREVIOUS:
               source.control(Source.CONTROL_PREV, true);
               break;
-            case KEYS.PLUS:
+            case KeypadEventPacket.KEYS.PLUS:
               source.control(Source.CONTROL_PLUS, true);
               break;
-            case KEYS.MINUS:
+            case KeypadEventPacket.KEYS.MINUS:
               source.control(Source.CONTROL_MINUS, true);
               break;
-            case KEYS.STOP:
+            case KeypadEventPacket.KEYS.STOP:
               source.control(Source.CONTROL_STOP, true);
               break;
-            case KEYS.PAUSE:
+            case KeypadEventPacket.KEYS.PAUSE:
               source.control(Source.CONTROL_PAUSE, true);
               break;
-            case KEYS.PLAY:
+            case KeypadEventPacket.KEYS.PLAY:
               source.control(Source.CONTROL_PLAY, true);
               break;
           }

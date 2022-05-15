@@ -1,4 +1,4 @@
-const RNetPacket = require('./RNetPacket');
+import RNetPacket from './RNetPacket';
 const {Buffer} = require('buffer');
 
 class HandshakePacket extends RNetPacket {
@@ -26,4 +26,4 @@ HandshakePacket.fromPacket = function (rNetPacket) {
   throw new TypeError('Cannot create HandshakePacket with anything other than RNetPacket');
 };
 
-module.exports = HandshakePacket;
+export default HandshakePacket;

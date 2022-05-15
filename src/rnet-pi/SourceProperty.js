@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   PROPERTY_AUTO_ON_ZONES: 1,
   PROPERTY_AUTO_OFF: 2,
   PROPERTY_OVERRIDE_NAME: 3,

@@ -19,7 +19,7 @@ const ROOT_CONTROLLER = 0;
 const MAX_ZONES = 6;
 
 function App() {
-  const [url, setURL] = useState(localStorage.getItem('lastUrl') || 'localhost:8080');
+  const [url, setURL] = useState(localStorage.getItem('lastUrl') || 'ws://localhost:8080');
   const [rnetState, setRNetState] = useState('Ready');
   const [_, setUpdate] = useState(0);
   const rnetRef = useRef<RNet | null>(null);

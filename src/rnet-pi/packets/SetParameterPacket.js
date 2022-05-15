@@ -1,14 +1,14 @@
-const DataPacket = require('./DataPacket');
+import DataPacket from './DataPacket';
 
-const parameterIDToString = require('../parameterIDToString');
+import parameterIDToString from '../parameterIDToString';
 
-module.exports = class SetParameterPacket extends DataPacket {
+export default class SetParameterPacket extends DataPacket {
   constructor(controllerID, zoneID, parameterID, value) {
     super();
 
     if (parameterID < 0 || parameterID > 8) {
       throw new Error(
-        `Unknown parameter ID (${parameterID}) while constructing SetParameterPacket`,
+        `Unknown parameter ID (${parameterID}) while constructing SetParameterPacket`
       );
     }
 
@@ -29,8 +29,8 @@ module.exports = class SetParameterPacket extends DataPacket {
         if (value < -10 || value > 10) {
           throw new Error(
             `Parameter "${parameterIDToString(
-              parameterID,
-            )}" out of range (-10 - +10) while constructing SetParameterPacket`,
+              parameterID
+            )}" out of range (-10 - +10) while constructing SetParameterPacket`
           );
         } else value += 10; // Add 10 for rNet
         break;
@@ -38,8 +38,8 @@ module.exports = class SetParameterPacket extends DataPacket {
         if (value < 0 || value > 100) {
           throw new Error(
             `Parameter "${parameterIDToString(
-              parameterID,
-            )}" out of range (0 - 100) while constructing SetParameterPacket`,
+              parameterID
+            )}" out of range (0 - 100) while constructing SetParameterPacket`
           );
         } else {
           value = Math.floor(value / 2);
@@ -50,8 +50,8 @@ module.exports = class SetParameterPacket extends DataPacket {
         if (value < 0 || value > 2) {
           throw new Error(
             `Parameter "${parameterIDToString(
-              parameterID,
-            )}" out of range (0 - 2) while constructing SetParameterPacket`,
+              parameterID
+            )}" out of range (0 - 2) while constructing SetParameterPacket`
           );
         }
         break;
@@ -92,4 +92,4 @@ module.exports = class SetParameterPacket extends DataPacket {
         return value == 1;
     }
   }
-};
+}

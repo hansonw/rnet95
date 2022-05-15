@@ -1,9 +1,6 @@
-const EventEmitter = require('events');
-
-const ExtraZoneParam = require('./extraZoneParam');
-const DisplayMessagePacket = require('./packets/DisplayMessagePacket');
-const RequestDataPacket = require('./packets/RequestDataPacket');
-const RequestParameterPacket = require('./packets/RequestParameterPacket');
+import EventEmitter from 'events';
+import DisplayMessagePacket from './packets/DisplayMessagePacket';
+import RequestDataPacket from './packets/RequestDataPacket';
 
 class Zone extends EventEmitter {
   constructor(rnet, ctrllrID, zoneID) {
@@ -230,4 +227,4 @@ class Zone extends EventEmitter {
   }
 }
 
-module.exports = Zone;
+export default Zone;

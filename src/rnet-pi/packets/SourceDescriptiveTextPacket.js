@@ -1,6 +1,6 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const DataPacket = require('./DataPacket');
-const RNetPacket = require('./RNetPacket');
+import DataPacket from './DataPacket';
+import RNetPacket from './RNetPacket';
 
 class SourceDescriptiveTextPacket extends DataPacket {
   constructor(sourceID, flashTime, message) {
@@ -34,4 +34,4 @@ SourceDescriptiveTextPacket.fromPacket = function (dataPacket) {
   );
 };
 
-module.exports = SourceDescriptiveTextPacket;
+export default SourceDescriptiveTextPacket;

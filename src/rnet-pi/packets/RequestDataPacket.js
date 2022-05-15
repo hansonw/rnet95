@@ -1,5 +1,5 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const RNetPacket = require('./RNetPacket');
+import RNetPacket from './RNetPacket';
 
 class RequestDataPacket extends RNetPacket {
   constructor(controllerID, zoneID, dataType) {
@@ -43,4 +43,4 @@ RequestDataPacket.DATA_TYPE = {
   ZONE_VOLUME: 0x01,
 };
 
-module.exports = RequestDataPacket;
+export default RequestDataPacket;

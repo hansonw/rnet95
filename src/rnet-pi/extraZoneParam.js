@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   BASS: 0,
   TREBLE: 1,
   LOUDNESS: 2,

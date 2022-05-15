@@ -1,5 +1,5 @@
-const DataPacket = require('./DataPacket');
-const ExtraZoneParam = require('../extraZoneParam');
+import DataPacket from './DataPacket';
+import ExtraZoneParam from '../extraZoneParam';
 
 class ZoneParameterPacket extends DataPacket {
   requiresHandshake() {
@@ -46,4 +46,4 @@ ZoneParameterPacket.fromPacket = function (dataPacket) {
   throw new TypeError('Cannot create ZoneParameterPacket with anything other than a DataPacket');
 };
 
-module.exports = ZoneParameterPacket;
+export default ZoneParameterPacket;

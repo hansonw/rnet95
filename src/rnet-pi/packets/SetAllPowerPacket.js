@@ -1,6 +1,6 @@
-const EventPacket = require('./EventPacket');
+import EventPacket from './EventPacket';
 
-module.exports = class SetAllPowerPacket extends EventPacket {
+export default class SetAllPowerPacket extends EventPacket {
   constructor(power) {
     super();
 
@@ -11,4 +11,4 @@ module.exports = class SetAllPowerPacket extends EventPacket {
     this.eventTimestamp = (power === true ? 1 : 0) << 8;
     this.eventPriority = 1;
   }
-};
+}

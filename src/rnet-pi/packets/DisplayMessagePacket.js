@@ -1,6 +1,6 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const DataPacket = require('./DataPacket');
-const RNetPacket = require('./RNetPacket');
+import DataPacket from './DataPacket';
+import RNetPacket from './RNetPacket';
 
 class DisplayMessagePacket extends DataPacket {
   constructor(ctrllrID, zoneID, alignment, flashTime, message) {
@@ -39,4 +39,4 @@ DisplayMessagePacket.fromPacket = function (dataPacket) {
 DisplayMessagePacket.ALIGN_CENTER = 0x00;
 DisplayMessagePacket.ALIGN_LEFT = 0x01;
 
-module.exports = DisplayMessagePacket;
+export default DisplayMessagePacket;

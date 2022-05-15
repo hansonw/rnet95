@@ -1,5 +1,5 @@
 const {SmartBuffer} = require('../../smart-buffer');
-const RNetPacket = require('./RNetPacket');
+import RNetPacket from './RNetPacket';
 
 class EventPacket extends RNetPacket {
   constructor() {
@@ -104,4 +104,4 @@ EventPacket.fromPacket = function (rNetPacket) {
   throw new TypeError('Cannot create EventPacket with anything other than RNetPacket');
 };
 
-module.exports = EventPacket;
+export default EventPacket;

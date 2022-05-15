@@ -1,4 +1,4 @@
-const EventPacket = require('./EventPacket');
+import EventPacket from './EventPacket';
 
 class SetPowerPacket extends EventPacket {
   constructor(controllerID, zoneID, power) {
@@ -34,4 +34,4 @@ SetPowerPacket.fromPacket = function (eventpacket) {
   throw new TypeError('Cannot create SetPowerPacket from anything other than an EventPacket');
 };
 
-module.exports = SetPowerPacket;
+export default SetPowerPacket;
