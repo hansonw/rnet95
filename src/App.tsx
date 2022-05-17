@@ -14,6 +14,7 @@ import {
 } from 'react95';
 
 import RNet from './rnet-pi/rnet';
+import Zone from './rnet-pi/zone';
 
 const ROOT_CONTROLLER = 0;
 const MAX_ZONES = 6;
@@ -36,17 +37,27 @@ function App() {
     setRNetState('Connecting...');
     rnet.on('update', (zoneId?: number) => {
       if (zoneId != null) {
-        setLoadedZones(new Set([...Array.from(loadedZones), zoneId]));
+        setLoadedZones(loadedZones => {
+          if (
+            loadedZones.size + 1 === rnetRef.current?.getZonesSize(ROOT_CONTROLLER) &&
+            !loadedZones.has(zoneId)
+          ) {
+            setRNetState('Connected');
+          }
+          return new Set([...Array.from(loadedZones), zoneId]);
+        });
+      } else {
+        // Force a refresh
+        setUpdate(x => x + 1);
       }
-      // Force a refresh
-      setUpdate(x => x + 1);
     });
     rnet.on('error', err => {
       console.error('Websocket error:', err);
       setRNetState('Error');
     });
     rnet.on('connected', () => {
-      setRNetState('Connected');
+      setRNetState(rnet.getZonesSize(ROOT_CONTROLLER) ? 'Waiting for zone info..' : 'Connected');
+      rnetRef.current = rnet;
     });
     rnet.on('disconnected', () => {
       if (rnetState !== 'Error') {
@@ -54,7 +65,6 @@ function App() {
       }
       rnetRef.current = null;
     });
-    rnetRef.current = rnet;
   }
 
   function addZone() {
@@ -66,6 +76,14 @@ function App() {
         zoneName,
         true
       );
+      setUpdate(x => x + 1);
+    }
+  }
+
+  function changeZoneName(zone: Zone) {
+    const zoneName = window.prompt('New name for the zone?', zone.getName());
+    if (zoneName) {
+      zone.setName(zoneName);
       setUpdate(x => x + 1);
     }
   }
@@ -111,7 +129,7 @@ function App() {
             {rnetRef.current?._zones?.[ROOT_CONTROLLER]?.map((zone, i) => (
               <Fieldset
                 key={i}
-                label={zone.getName()}
+                label={<span onClick={() => changeZoneName(zone)}>{zone.getName()}</span>}
                 disabled={!loadedZones.has(zone.getZoneID())}
               >
                 <Button
