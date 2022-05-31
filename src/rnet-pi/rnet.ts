@@ -61,7 +61,6 @@ export default class RNet extends EventEmitter {
       this.emit('disconnected');
     });
     this._serialPort.addEventListener('message', e => {
-      console.debug('got message');
       this._handleData(e.data);
     });
   }
@@ -171,12 +170,14 @@ export default class RNet extends EventEmitter {
         }
 
         this.emit('power', zone, powered);
+        this.emit('update', zone);
       })
       .on('volume', (volume, rNetTriggered) => {
         if (!rNetTriggered) {
           this.sendData(new SetVolumePacket(zone.getControllerID(), zone.getZoneID(), volume));
         }
         this.emit('volume', zone, volume);
+        this.emit('update', zone);
       })
       .on('max-volume', maxVolume => {
         this.emit('max-volume', zone, maxVolume);
@@ -203,6 +204,7 @@ export default class RNet extends EventEmitter {
         }
 
         this.emit('source', zone, sourceID);
+        this.emit('update', zone);
       })
       .on('parameter', (parameterID, value, rNetTriggered) => {
         if (!rNetTriggered) {
@@ -211,6 +213,7 @@ export default class RNet extends EventEmitter {
           );
         }
         this.emit('parameter', zone, parameterID, value);
+        this.emit('update', zone);
       });
 
     zone.requestInfo();

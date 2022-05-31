@@ -29,7 +29,7 @@ class RNetPacket {
     buffer.writeUInt8(this.calculateChecksum(buffer));
     buffer.writeUInt8(BYTE_END_MESSAGE);
 
-    return buffer.toBuffer().buffer;
+    return buffer.toBuffer();
   }
 
   getMessageBody() {
