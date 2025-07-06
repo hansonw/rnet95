@@ -4,7 +4,6 @@ import {
   Divider,
   Fieldset,
   Panel,
-  Select,
   Slider,
   TextField,
   Toolbar,
@@ -16,7 +15,6 @@ import {
 import RNet from './rnet-pi/rnet';
 import Zone from './rnet-pi/zone';
 import ExtraZoneParam from './rnet-pi/extraZoneParam';
-import parameterIDToString from './rnet-pi/parameterIDToString';
 
 const ROOT_CONTROLLER = 0;
 const MAX_ZONES = 6;
@@ -24,7 +22,7 @@ const MAX_ZONES = 6;
 function App() {
   const [url, setURL] = useState(localStorage.getItem('lastUrl') || 'ws://localhost:8080');
   const [rnetState, setRNetState] = useState('Ready');
-  const [_, setUpdate] = useState(0);
+  const [, setUpdate] = useState(0);
   const rnetRef = useRef<RNet | null>(null);
   const [optimisticVolume, setOptimisticVolume] = useState<Map<number, number>>(new Map());
   const [loadedZones, setLoadedZones] = useState<Set<number>>(new Set());
@@ -211,8 +209,13 @@ function App() {
                     value={value}
                     style={{marginBottom: 0, marginTop: 8}}
                     onChange={
-                      ((_: any, v: any) => {
-                        if (typeof v !== 'number') return;
+                      ((
+                        _e:
+                          | React.KeyboardEvent
+                          | React.TouchEvent
+                          | React.FormEvent<HTMLDivElement>,
+                        v: number
+                      ) => {
                         if (param === ExtraZoneParam.TURN_ON_VOLUME) {
                           setOptimisticVolume(
                             new Map([...Array.from(optimisticVolume.entries()), [zoneId, v]])
@@ -222,7 +225,8 @@ function App() {
                           zone.setParameter(param, v);
                           setUpdate(x => x + 1); // force UI update
                         }
-                      }) as any
+                      }) as React.FormEventHandler<HTMLDivElement> &
+                        ((event: React.KeyboardEvent | React.TouchEvent, newValue: number) => void)
                     }
                   />
                 </Fieldset>
