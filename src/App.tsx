@@ -163,11 +163,12 @@ function App() {
                     }}
                   >
                     <Button
+                      square
                       active={zone.getPower()}
                       onClick={() => zone.setPower(!zone.getPower())}
-                      style={{verticalAlign: 'middle'}}
+                      aria-label="Power"
                     >
-                      Power
+                      <span role="img" aria-label="power">⏻</span>
                     </Button>
                     <Button
                       square
