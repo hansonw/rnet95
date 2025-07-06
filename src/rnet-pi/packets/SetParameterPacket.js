@@ -1,3 +1,4 @@
+import {Buffer} from 'buffer';
 import DataPacket from './DataPacket';
 
 import parameterIDToString from '../parameterIDToString';

@@ -528,6 +528,7 @@ export default class RNet extends EventEmitter {
       | ZonePowerPacket
       | ZoneSourcePacket
       | ZoneVolumePacket
+      | HandshakePacket
   ) {
     console.debug(`DEBUG: Received packet ${packet.constructor.name} from RNet.`);
 
@@ -665,6 +666,8 @@ export default class RNet extends EventEmitter {
           }
         }
         this.emit('update');
+      } else if (packet instanceof HandshakePacket) {
+        console.log('Received handshake packet', packet._handshakeType);
       } else {
         console.warn(
           'Received keypad event from unknown Zone (%d-%d)',

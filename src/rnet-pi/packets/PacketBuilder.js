@@ -8,6 +8,7 @@ import ZonePowerPacket from './ZonePowerPacket';
 import ZoneSourcePacket from './ZoneSourcePacket';
 import ZoneVolumePacket from './ZoneVolumePacket';
 import ZoneParameterPacket from './ZoneParameterPacket';
+import HandshakePacket from './HandshakePacket';
 
 function inArray(arr, val) {
   for (key in arr) {
@@ -26,6 +27,8 @@ export function build(buffer) {
     case 0x00:
       packet = DataPacket.fromPacket(packet);
       break;
+    case 0x02:
+      return HandshakePacket.fromPacket(packet);
     case 0x05:
       packet = EventPacket.fromPacket(packet);
       break;
