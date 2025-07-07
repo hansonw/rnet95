@@ -5,6 +5,7 @@ import {
   Fieldset,
   Panel,
   Slider,
+  Select,
   TextField,
   Toolbar,
   Window,
@@ -15,11 +16,18 @@ import {
 import RNet from './rnet-pi/rnet';
 import Zone from './rnet-pi/zone';
 import ExtraZoneParam from './rnet-pi/extraZoneParam';
+// @ts-ignore
+import themes from 'react95/dist/themes';
 
 const ROOT_CONTROLLER = 0;
 const MAX_ZONES = 6;
 
-function App() {
+interface AppProps {
+  themeName: string;
+  setThemeName: (name: string) => void;
+}
+
+function App({themeName, setThemeName}: AppProps) {
   const [url, setURL] = useState(localStorage.getItem('lastUrl') || 'ws://localhost:8080');
   const [rnetState, setRNetState] = useState('Ready');
   const [, setUpdate] = useState(0);
@@ -95,6 +103,10 @@ function App() {
 
   const sources =
     rnetRef.current?.getSources()?.map((_, i) => ({value: i, label: String(i)})) ?? [];
+  const themeOptions = Object.keys(themes).map(name => ({
+    value: name,
+    label: (themes as any)[name].name || name,
+  }));
 
   return (
     <div id="root">
@@ -115,6 +127,13 @@ function App() {
           >
             New Zone
           </Button>
+          <Select
+            options={themeOptions}
+            value={themeName}
+            width={150}
+            onChange={((e: any, option: any) => setThemeName(option.value as string)) as any}
+            style={{marginLeft: 4}}
+          />
         </Toolbar>
         <Divider />
         <WindowContent>
